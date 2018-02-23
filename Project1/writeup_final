@@ -1,0 +1,40 @@
+# **Finding Lane Lines on the Road** 
+
+---
+
+**Finding Lane Lines on the Road**
+
+The goals / steps of this project are the following:
+* Make a pipeline that finds lane lines on the road
+* Reflect on your work in a written report
+
+
+### Reflection
+
+### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
+
+My pipeline first consisted of converting to grayscale. Then the image was gaussian blurred to smooth some of the edges in preparation for canny transform.
+
+Next the canny transform with a high derivative threshold of 150 and low threshold of 60 then gave outlines of edge transitions, then a region of interest that mainly follows along parralax lines that go up about halfway to the picture was masked.
+
+To find straight lines out of the edge transitions a Hough transform was applied with a fine angular resolution of 1 degree and 2 distance pixels. A threshold of at least 10 intersections on the Hough grid was needed to get a line.
+
+To filter for lines that mainly represented the curve of the lane markers the lines were first filtered into two categories: belonging to right lane or the left lane. This was done by filtering based on the slope of the line: if a line was between 70 and 20 degrees slope it was put in the right lane category, if a line was between -70 and -20 deg slope it was put in the left lane.
+
+The slopes were found by going through each lines endpoints: (y2-y1)/(x2-x1). Centerpoints of each line were found by using: (x1+x2)/2 for x_center and (y1+y2)/2 for y_center.
+
+The average for both the right_lane slopes/centerpoints along with left_lane slopes/centerpoints were found.
+
+Using the average and centerpoint for the right lane along with y_top=320, a line was extrapolated from its centerpoint to where x_top_right lane would be; the same process was done for the lower portion of the lane. The same process was done for the left lane.
+
+### 2. Identify potential shortcomings with your current pipeline
+
+
+One shortcoming would be if the hood of the car comes into the region of interest. If the slopes from the hood are within the interval of 70 to 20 degrees they will be put into the slope/centerpoint average and affect the overall calcuation for the right and left lane extrapolation.
+
+Another shortcoming is if the right or left lane heavily curves, more than 70 or less than 20 degrees; the overall straight line extrapolation would be skewed
+
+
+### 3. Suggest possible improvements to your pipeline
+
+A possible improvement would be to filter line segments from top to bottom. If a line segment differs to much from running average it is rejected
